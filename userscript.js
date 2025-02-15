@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         InstaBypass X
 // @namespace    http://tampermonkey.net/
-// @version      X
+// @version      X.1
 // @description  Instant Bypass for Adlinks!
 // @author       mrdavidss + pookie deepseek v3
 // @match        *://*.linkvertise.com/*
