@@ -78,7 +78,7 @@
         const ui = createUI();
 
         // Wait for 2 seconds to ensure the UI is visible
-        await wait(2000);
+        await wait(1200);
 
         // Get the current URL of the opened tab
         const currentUrl = window.location.href;
