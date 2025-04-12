@@ -105,6 +105,12 @@
     }
 
     async function bypassProcess() {
+        // Don't run if we're already on bypass.city
+        if (window.location.hostname === 'bypass.city') {
+            console.log('Already on bypass.city, skipping redirection');
+            return;
+        }
+        
         if (window.location.hostname === 'linkvertise.com' || window.location.hostname === 'www.linkvertise.com') {
             if (window.location.pathname === '/' || window.location.pathname === '') {
                 console.log('Linkvertise homepage detected. Skipping bypass.');
