@@ -78,11 +78,13 @@
 // @exclude      *://www.linkvertise.com/
 // @grant        none
 // ==/UserScript==
-
 (function () {
     'use strict';
 
-    function createUI() {
+    // Unique identifier for this script's operations
+    const SCRIPT_ID = 'instabypass-x-14.0.2';
+
+    function createUI(message) {
         const ui = document.createElement('div');
         ui.style.position = 'fixed';
         ui.style.top = '20px';
@@ -95,7 +97,7 @@
         ui.style.borderRadius = '5px';
         ui.style.zIndex = '9999';
         ui.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
-        ui.textContent = 'Bypassing Link with (InstaBypass X)...';
+        ui.textContent = message;
         document.body.appendChild(ui);
         return ui;
     }
@@ -105,29 +107,52 @@
     }
 
     async function bypassProcess() {
-        // Don't run if we're already on bypass.city
-        if (window.location.hostname === 'bypass.city') {
-            console.log('Already on bypass.city, skipping redirection');
+        // Skip if we've already processed this URL in this session
+        const processedKey = `${SCRIPT_ID}-processed-${window.location.href}`;
+        if (sessionStorage.getItem(processedKey)) {
+            console.log('URL already processed in this session, skipping');
             return;
         }
-        
-        if (window.location.hostname === 'linkvertise.com' || window.location.hostname === 'www.linkvertise.com') {
-            if (window.location.pathname === '/' || window.location.pathname === '') {
-                console.log('Linkvertise homepage detected. Skipping bypass.');
-                return;
-            }
+
+        // Don't run on bypass.city or its subdomains
+        if (window.location.hostname.includes('bypass.city')) {
+            console.log('Bypass destination reached');
+            return;
         }
 
-        const ui = createUI();
+        // Skip Linkvertise homepage
+        if (window.location.hostname.match(/(www\.)?linkvertise\.com/) && 
+            ['/', ''].includes(window.location.pathname)) {
+            console.log('Linkvertise homepage detected, skipping');
+            return;
+        }
 
-        await wait(450);
+        // Mark this URL as processed
+        sessionStorage.setItem(processedKey, 'true');
 
-        const currentUrl = window.location.href;
+        const ui = createUI('Bypassing Link with (InstaBypass X)...');
+        
+        try {
+            await wait(450);
+            
+            // Create new URL to avoid potential loops from redirects
+            const bypassUrl = new URL('https://bypass.city/bypass');
+            bypassUrl.searchParams.set('bypass', window.location.href);
+            bypassUrl.searchParams.set('userscript', 'true');
+            bypassUrl.searchParams.set('userscript-version', '14.0.2');
+            
+            // Add a random parameter to prevent caching issues
+            bypassUrl.searchParams.set('_t', Date.now());
 
-        const bypassUrl = `http://bypass.city/bypass?bypass=${encodeURIComponent(currentUrl)}&userscript=true&userscript-version=14.0.2`;
-
-        window.location.href = bypassUrl;
+            ui.textContent = 'Redirecting to bypass service...';
+            window.location.href = bypassUrl.toString();
+        } catch (error) {
+            ui.textContent = 'Bypass failed!';
+            console.error('Bypass error:', error);
+            setTimeout(() => document.body.removeChild(ui), 3000);
+        }
     }
 
-    bypassProcess();
+    // Run with a slight delay to allow page to settle
+    setTimeout(bypassProcess, 100);
 })();
